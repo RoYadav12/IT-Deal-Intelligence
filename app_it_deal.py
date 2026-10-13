@@ -145,8 +145,8 @@ def to_excel_bytes(df):
 
 ui_theme.hero(
     "IT Deal Intelligence",
-    "Search the web for IT deals - acquisitions, outsourcing, managed services, "
-    "cloud - and turn them into a clean table you can download. Works with just a Serper key.",
+    "Search the web for IT contract deals - cloud, AI, managed services, outsourcing, "
+    "cybersecurity, ERP and more (no M&A) - and turn them into a clean table you can download. Works with just a Serper key.",
     chips=["🔎 Serper web search", "⚡ Heuristic or Claude / OpenAI", "📅 Real Google date filter", "📥 Excel export"],
 )
 
@@ -285,7 +285,7 @@ with tab_discover:
     with st.expander("⚙️ Search settings (cost control)"):
         angles = st.multiselect(
             "Search angles (each one = 1 Serper search)",
-            options=config.DISCOVERY_QUERIES, default=config.DISCOVERY_QUERIES,
+            options=config.DISCOVERY_QUERIES, default=config.DEFAULT_DISCOVERY_QUERIES,
         )
         s1, s2 = st.columns(2)
         results_per_query = s1.slider(

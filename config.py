@@ -175,13 +175,111 @@ CUSTOM_RANGE_LABEL = "Custom range"
 DEFAULT_TENURE = "Past month"
 
 # Search "angles" - each one is a separate Serper search per click.
+# IMPORTANT: Serper FREE accounts reject search operators (OR, quotes,
+# brackets, minus signs) with "Query pattern not allowed for free accounts".
+# So every query below is plain words only. Each one pairs one theme from your
+# keyword list with a deal-signal word (contract / agreement / awarded ...).
+# Edit freely: one line = one Serper search.
 DISCOVERY_QUERIES = [
-    "IT services acquisition deal announced",
-    "technology company merger acquisition IT",
+    # Cloud
+    "cloud migration contract awarded",
+    "cloud transformation agreement signed",
+    "cloud modernization multi-year contract",
+    "cloud managed services agreement",
+    "AWS strategic collaboration agreement enterprise",
+    "Microsoft Azure multi-year agreement enterprise",
+    "Google Cloud multi-year contract enterprise",
+    "hybrid cloud multi-cloud contract awarded",
+    "SaaS PaaS IaaS agreement signed enterprise",
+    "data center modernization migration contract",
+    # AI
+    "generative AI implementation contract signed",
+    "AI integration partnership commercial agreement",
+    "large language models enterprise deployment agreement",
+    "AI infrastructure GPU contract agreement",
+    "AI automation enterprise contract awarded",
+    # Transformation / modernization
+    "digital transformation contract awarded",
+    "legacy system modernization contract",
+    "application modernization contract awarded",
+    "IT modernization contract awarded",
+    # Outsourcing / managed services
     "IT outsourcing contract signed",
-    "managed services deal announced",
-    "cloud migration deal contract announced",
-    "IT deal news",
+    "IT outsourcing renewal multi-year",
+    "managed IT services agreement signed",
+    "managed infrastructure services contract awarded",
+    "application development and maintenance contract awarded",
+    "application management services contract signed",
+    "service desk outsourcing contract",
+    "IT services contract renewal extension",
+    # Security
+    "cybersecurity contract awarded",
+    "managed security services agreement signed",
+    "zero trust security implementation contract",
+    # Data
+    "data analytics contract awarded",
+    "data modernization migration contract",
+    "data warehouse lakehouse implementation contract",
+    # Enterprise software
+    "ERP implementation contract awarded",
+    "SAP S/4HANA implementation contract signed",
+    "Salesforce ServiceNow implementation contract",
+    "software licensing agreement enterprise signed",
+    # Engineering / automation
+    "software development contract awarded",
+    "DevOps platform engineering contract",
+    "systems integration contract awarded",
+    "robotic process automation intelligent automation contract",
+    # Network / industry
+    "network modernization SD-WAN contract",
+    "5G implementation Industry 4.0 industrial IoT contract",
+    # Contract-language catch-alls
+    "master services agreement IT services signed",
+    "IT contract award multi-year technology",
+    "technology partnership commercial agreement signed",
+    "IT vendor selected technology procurement contract",
+    # Verticals
+    "healthcare IT modernization contract",
+    "government IT modernization contract awarded",
+    "fintech banking technology implementation agreement",
+    "telecom IT transformation contract",
+    "retail technology transformation contract",
+]
+
+# The angles ticked by default in the app (keeps a one-click run cheap:
+# 12 Serper searches). Tick more in "Search settings" for wider coverage.
+DEFAULT_DISCOVERY_QUERIES = [
+    "cloud migration contract awarded",
+    "cloud managed services agreement",
+    "generative AI implementation contract signed",
+    "digital transformation contract awarded",
+    "IT outsourcing contract signed",
+    "managed IT services agreement signed",
+    "application development and maintenance contract awarded",
+    "cybersecurity contract awarded",
+    "data analytics contract awarded",
+    "ERP implementation contract awarded",
+    "master services agreement IT services signed",
+    "IT contract award multi-year technology",
+]
+
+# Search operators can't be used on free Serper accounts, so Google can't drop
+# M&A noise up front. Exclusions are enforced afterwards instead: by the AI
+# prompts, the heuristic extractor, and the Python safety net below.
+QUERY_EXCLUSIONS = ""
+
+# Python safety net: a deal whose type/summary matches these AND which has no
+# contract-type signal is dropped before saving.
+EXCLUDED_DEAL_TERMS = [
+    "merger", "acquisition", "m&a", "takeover", "buyout", "divestiture",
+    "equity investment", "venture capital", "private equity", "stock purchase",
+    "share transfer", "corporate restructuring", "funding round", "fundraising",
+    "joint venture",
+]
+CONTRACT_SIGNAL_TERMS = [
+    "contract", "agreement", "msa", "sow", "awarded", "renewal", "extension",
+    "outsourc", "managed service", "implementation", "licens", "selected",
+    "selects", "signed", "deployment",
 ]
 
 DISCOVERY_RESULTS_PER_QUERY = 20     # Serper "num" (10-50)
@@ -209,6 +307,9 @@ DISCOVERY_TECHNOLOGY_OPTIONS = [
 ]
 
 DEAL_TYPES = [
-    "acquisition", "merger", "outsourcing contract", "managed services",
-    "cloud deal", "partnership", "other",
+    "cloud services contract", "outsourcing contract", "managed services",
+    "AI / automation deal", "software / ERP implementation",
+    "cybersecurity contract", "data & analytics contract",
+    "digital transformation contract", "technology partnership",
+    "licensing agreement", "contract renewal / extension", "other",
 ]

@@ -112,13 +112,39 @@ _CONTRACT_PATTERNS = [
 ]
 
 _DEAL_TYPE_KEYWORDS = [
-    (r"\bacqui(?:re[ds]?|ring|sition)\b|\bbuyout\b|\btakeover\b|\bpurchase[sd]?\b", "acquisition"),
-    (r"\bmergers?\b|\bmerge[sd]?\b", "merger"),
+    (r"\brenew(?:s|ed|al)\b|\bextend(?:s|ed)\b|\bextension\b|\bexpan(?:ds|ded|sion)\b", "contract renewal / extension"),
     (r"\boutsourc", "outsourcing contract"),
-    (r"\bmanaged\s+services?\b|\bmsp\b", "managed services"),
-    (r"\bcloud\b|\bmigration\b|\bsaas\b|\biaas\b|\bpaas\b", "cloud deal"),
-    (r"\bpartner(?:ship|s)?\b|\balliance\b|\bcollaborat", "partnership"),
+    (r"\bmanaged\s+(?:it\s+|cloud\s+|security\s+|infrastructure\s+)?services?\b|\bmsp\b|\bams\b", "managed services"),
+    (r"\bcyber\s*secur|\bzero[- ]trust\b|\bcloud\s+security\b", "cybersecurity contract"),
+    (r"\bgen(?:erative)?\s*ai\b|\bartificial\s+intelligence\b|\bmachine\s+learning\b|\bllm\b|\bai\b|\brpa\b|\bautomation\b", "AI / automation deal"),
+    (r"\berp\b|\bs/?4\s*hana\b|\bsalesforce\b|\bservicenow\b|\boracle\s+cloud\b|\bimplementation\b", "software / ERP implementation"),
+    (r"\bdata\s+(?:analytics|engineering|migration|modernization|warehouse|lakehouse)\b|\bbig\s+data\b|\bbusiness\s+intelligence\b", "data & analytics contract"),
+    (r"\bcloud\b|\bmigration\b|\bsaas\b|\biaas\b|\bpaas\b|\bazure\b|\baws\b|\bgoogle\s+cloud\b", "cloud services contract"),
+    (r"\bdigital\s+transformation\b|\bmodernization\b|\bmodernisation\b|\bdigitali[sz]ation\b", "digital transformation contract"),
+    (r"\blicen[sc](?:e|ing)\b", "licensing agreement"),
+    (r"\bpartner(?:ship|s)?\b|\balliance\b|\bcollaborat", "technology partnership"),
 ]
+
+# Out-of-scope transactions (M&A, funding...). A result that talks about these
+# is skipped unless it also carries a contract-style signal.
+_EXCLUDED_RE = re.compile(
+    r"\bmergers?\b|\bmerge[sd]?\b|\bacqui(?:re[ds]?|ring|sitions?)\b|\bm&a\b|"
+    r"\btakeovers?\b|\bbuyouts?\b|\bdivest\w*|\bequity\s+(?:investment|stake)\b|"
+    r"\bventure\s+capital\b|\bprivate\s+equity\b|\bstock\s+purchase\b|"
+    r"\bshare\s+(?:purchase|transfer)\b|\brestructur\w*|\bfunding\b|\bfundrais\w*|"
+    r"\braises?\s+\$|\bseries\s+[a-e]\b|\bjoint\s+venture\b|\bipo\b",
+    re.I,
+)
+_CONTRACT_RE = re.compile(
+    r"\bcontract\b|\bagreement\b|\bmsa\b|\bsow\b|\bawarded\b|\brenew\w*|"
+    r"\bextension\b|\boutsourc\w*|\bmanaged\s+services?\b|\bimplementation\b|"
+    r"\blicens\w*|\bselects?\b|\bselected\b|\bsigns?\b|\bsigned\b|\bdeployment\b",
+    re.I,
+)
+
+
+def _is_out_of_scope(text: str) -> bool:
+    return bool(_EXCLUDED_RE.search(text)) and not _CONTRACT_RE.search(text)
 
 _TECH_KEYWORDS = [
     (r"\bcyber\s*secur|\bsecurity\b|\bthreat\b|\bsoc\b", "Cybersecurity"),
@@ -300,6 +326,9 @@ def structure_search_result(item: dict) -> dict:
     )):
         return {}
 
+    if _is_out_of_scope(combined):
+        return {}
+
     deal_type = _detect_deal_type(combined)
     customer, vendor = _pick_parties(combined, deal_type)
     value = _extract_value(combined)
@@ -311,8 +340,8 @@ def structure_search_result(item: dict) -> dict:
 
     if customer == "Unknown" and vendor == "Unknown" and deal_type == "other":
         if not re.search(
-            r"\b(deal|contract|acquisition|merger|outsourc|managed\s+service|"
-            r"partnership|agreement|awarded|signed)\b",
+            r"\b(deal|contract|outsourc|managed\s+service|"
+            r"partnership|agreement|awarded|signed|renewal|selects?)\b",
             low,
         ):
             return {}
@@ -354,6 +383,8 @@ def structure_results(results: list[dict]) -> list[dict]:
 def extract_from_article(article_text: str, url: str = "", title_hint: str = "") -> dict:
     """Heuristic extraction from full page text (RSS / manual URL path)."""
     head = (title_hint + "\n" + (article_text or ""))[:6000]
+    if _is_out_of_scope(head):
+        raise ValueError("Skipped: M&A / funding article with no IT contract")
     deal_type = _detect_deal_type(head)
     customer, vendor = _pick_parties(head, deal_type)
     value = _extract_value(head)

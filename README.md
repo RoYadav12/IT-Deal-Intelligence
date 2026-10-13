@@ -1,6 +1,6 @@
 # IT Deal Intelligence
 
-Searches the web for IT deals (acquisitions, outsourcing, managed services, cloud),
+Searches the web for IT contract deals (cloud, AI, managed services, outsourcing, cybersecurity, ERP; M&A excluded),
 turns them into a clean table, and lets you download Excel/CSV.
 
 * **Serper** runs the Google searches (with a real date filter) and scrapes pages.
